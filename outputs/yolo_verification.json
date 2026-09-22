@@ -1,0 +1,68 @@
+{
+  "detection": {
+    "summary": {
+      "total_frames": 20,
+      "successful_frames": 20,
+      "average_processing_time_ms": 225.17867000424303,
+      "median_processing_time_ms": 40.30900000361726,
+      "minimum_processing_time_ms": 37.680800014641136,
+      "maximum_processing_time_ms": 3734.887600003276,
+      "p95_processing_time_ms": 232.6074350217849,
+      "average_fps": 23.55068728408907,
+      "minimum_fps": 0.2677456745951666,
+      "maximum_fps": 26.538714666658965,
+      "aggregate_processing_fps": 4.440917960751598,
+      "average_objects_per_frame": 5.05,
+      "maximum_objects_detected": 6,
+      "unique_tracks": 6,
+      "mode": "detection",
+      "source_fps": 10.0,
+      "width": 480,
+      "height": 640,
+      "source_frame_count": 20,
+      "codec": "H.264 / yuv420p",
+      "processing_export_validation_seconds": 13.672227400005795,
+      "entered": 0,
+      "exited": 0
+    },
+    "image_class_counts": {
+      "bus": 1,
+      "person": 4,
+      "stop sign": 1
+    },
+    "mask_count": 0
+  },
+  "segmentation": {
+    "summary": {
+      "total_frames": 20,
+      "successful_frames": 20,
+      "average_processing_time_ms": 75.61766999715474,
+      "median_processing_time_ms": 62.6114500046242,
+      "minimum_processing_time_ms": 58.9210000471212,
+      "maximum_processing_time_ms": 245.2097000204958,
+      "p95_processing_time_ms": 93.87735998607252,
+      "average_fps": 14.668336986433513,
+      "minimum_fps": 4.078142095995449,
+      "maximum_fps": 16.97187758524575,
+      "aggregate_processing_fps": 13.224422281691924,
+      "average_objects_per_frame": 5.25,
+      "maximum_objects_detected": 6,
+      "unique_tracks": 6,
+      "mode": "segmentation",
+      "source_fps": 10.0,
+      "width": 480,
+      "height": 640,
+      "source_frame_count": 20,
+      "codec": "H.264 / yuv420p",
+      "processing_export_validation_seconds": 4.725335599971004,
+      "entered": 0,
+      "exited": 0
+    },
+    "image_class_counts": {
+      "person": 4,
+      "bus": 1,
+      "skateboard": 1
+    },
+    "mask_count": 6
+  }
+}

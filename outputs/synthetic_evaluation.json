@@ -1,0 +1,15 @@
+{
+  "matching_rule": "Greedy one-to-one nearest centroid <= 20 pixels; controlled non-overlapping lanes",
+  "matched": 865,
+  "false_positives": 0,
+  "missed": 0,
+  "centroid_precision": 1.0,
+  "centroid_recall": 1.0,
+  "shape_accuracy_on_matches": 1.0,
+  "mean_center_error_px": 0.39999657966146795,
+  "count_mae": 0.0,
+  "count_exact_frame_fraction": 1.0,
+  "matched_track_id_changes": 0,
+  "ground_truth_objects": 4,
+  "scope": "Synthetic benchmark only; not mAP, MOT accuracy or general-purpose CV accuracy."
+}

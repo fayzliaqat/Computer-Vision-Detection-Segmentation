@@ -1,0 +1,59 @@
+{
+  "summary": {
+    "total_frames": 240,
+    "successful_frames": 240,
+    "average_processing_time_ms": 19.187374581573142,
+    "median_processing_time_ms": 19.00279999244958,
+    "minimum_processing_time_ms": 14.610400015953928,
+    "maximum_processing_time_ms": 24.35459999833256,
+    "p95_processing_time_ms": 22.74939001945313,
+    "average_fps": 52.74238903603827,
+    "minimum_fps": 41.06000509425181,
+    "maximum_fps": 68.44439569813578,
+    "aggregate_processing_fps": 52.11760450855865,
+    "average_objects_per_frame": 3.6041666666666665,
+    "maximum_objects_detected": 4,
+    "unique_tracks": 4,
+    "mode": "classical",
+    "source_fps": 30.0,
+    "width": 960,
+    "height": 540,
+    "source_frame_count": 240,
+    "codec": "H.264 / yuv420p",
+    "processing_export_validation_seconds": 13.16295089997584,
+    "entered": 2,
+    "exited": 2
+  },
+  "config": {
+    "gaussianKernel": 5,
+    "blockSize": 31,
+    "thresholdC": 7,
+    "adaptiveMethod": "Gaussian",
+    "morphologyKernel": 3,
+    "minArea": 250,
+    "maxArea": 20000,
+    "maxDistance": 55,
+    "maxDisappeared": 10
+  },
+  "roi": [
+    0.2,
+    0.1,
+    0.8,
+    0.9
+  ],
+  "line": 0.5,
+  "tracking": true,
+  "confidence": 0.25,
+  "representative_frames": [
+    1,
+    120,
+    239
+  ],
+  "video": "videos/opencv_segmented_output.mp4",
+  "input_name": "sample_shapes.mp4",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+  "python": "3.13.3",
+  "opencv": "4.11.0",
+  "timing_scope": "Preprocess/inference + association + analytics + overlays; excludes decode, HUD, encoding, disk I/O and model load. First inference included."
+}
