@@ -15,6 +15,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PipelineTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        (ROOT / "tmp").mkdir(exist_ok=True)
+
     def test_shapes_and_area_bounds(self):
         frame = np.full((300, 600, 3), 240, np.uint8)
         cv2.circle(frame, (90, 140), 35, (30, 30, 30), -1)

@@ -10,6 +10,7 @@ class YoloDetector:
         if not 0 < confidence <= 1:
             raise ValueError("Confidence must be in (0, 1]")
         root = Path(__file__).resolve().parents[1]
+        (root / "models").mkdir(exist_ok=True)
         configDir = root / "tmp" / "ultralytics"
         configDir.mkdir(parents=True, exist_ok=True)
         os.environ.setdefault("YOLO_CONFIG_DIR", str(configDir))
