@@ -1,0 +1,26 @@
+name: Core vision checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - name: Install core dependencies only
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg libgl1
+          python -m pip install -r requirements.txt ruff
+      - name: Compile and lint
+        run: |
+          python -m compileall -q src scripts tests app.py benchmark.py generate_demo.py realtime_demo.py
+          python -m ruff check . --select E9,F --exclude tmp
+      - name: Test without downloading model weights
+        run: python -m unittest discover -s tests -v

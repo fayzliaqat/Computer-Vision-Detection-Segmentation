@@ -38,6 +38,7 @@ with st.sidebar:
     page = st.radio(
         "Navigate",
         [
+            "Traffic Analytics",
             "Live Vision Pipeline",
             "Frame Analysis",
             "Performance Dashboard",
@@ -70,8 +71,13 @@ def showMetrics(run):
             ("Frames", summary["total_frames"]),
             ("Latency (ms)", f"{summary['average_processing_time_ms']:.2f}"),
             ("Processing FPS", f"{summary['aggregate_processing_fps']:.1f}"),
-            ("Peak objects", summary["maximum_objects_detected"]),
-            ("Unique IDs", summary["unique_tracks"]),
+            (
+                "Peak vehicles" if run.get("traffic") else "Peak objects",
+                summary["maximum_objects_detected"],
+            ),
+            ("Crossings", summary["total_crossings"])
+            if run.get("traffic")
+            else ("Unique IDs", summary["unique_tracks"]),
         ],
     ):
         col.metric(title, value)
@@ -84,7 +90,11 @@ def uploadPath(upload, folder):
     return path
 
 
-if page == "Live Vision Pipeline":
+if page == "Traffic Analytics":
+    from src.traffic_page import renderTrafficPage
+
+    renderTrafficPage(ROOT)
+elif page == "Live Vision Pipeline":
     for col, title, subtitle in zip(
         st.columns(4),
         [
@@ -191,6 +201,12 @@ if page == "Live Vision Pipeline":
             st.info("Process the built-in demo to create your first run.")
 elif page == "Frame Analysis":
     st.subheader("Pipeline inspector")
+    dataset = st.radio(
+        "Inspect dataset", ["Selected run", "Classical benchmark"], horizontal=True
+    )
+    if dataset == "Classical benchmark":
+        runDir = ROOT / "outputs"
+        manifest = json.loads((runDir / "run.json").read_text(encoding="utf-8"))
     st.caption(
         "Saved representative frames: changing the selection reads artifacts without rerunning the video."
     )
@@ -214,9 +230,15 @@ elif page == "Frame Analysis":
         ]
         for index, col in enumerate(st.columns(2)):
             for name in available[index::2]:
+                label = name.title()
+                if name == "segmented":
+                    label = {
+                        "detection": "Detections (bounding boxes)",
+                        "segmentation": "Instance segmentation masks",
+                    }.get(manifest["summary"]["mode"], "Contour segmentation")
                 col.image(
                     str(runDir / "frames" / f"frame_{number:04d}_{name}.png"),
-                    caption=name.title(),
+                    caption=label,
                     width="stretch",
                 )
         df = pd.read_csv(runDir / "frame_metrics.csv")
@@ -232,6 +254,10 @@ elif page == "Performance Dashboard":
             f"P50 {summary['median_processing_time_ms']:.2f} ms  |  P95 {summary['p95_processing_time_ms']:.2f} ms  |  Source {summary['source_fps']:.1f} FPS"
         )
         df = pd.read_csv(runDir / "frame_metrics.csv")
+        if manifest.get("traffic"):
+            st.caption(
+                f"First-frame processing: {df.processing_time_ms.iloc[0]:.1f} ms, included in the mean and chart. Visible counts are not congestion or density estimates."
+            )
         a, b = st.columns(2)
         a.markdown("**Latency / ms**")
         a.line_chart(
@@ -239,10 +265,16 @@ elif page == "Performance Dashboard":
         )
         b.markdown("**Processing FPS**")
         b.line_chart(df.set_index("frame_number")[["fps"]], color=["#ffc373"])
-        a.markdown("**Objects and tracks**")
+        a.markdown(
+            "**Active vehicles**"
+            if manifest.get("traffic")
+            else "**Objects and tracks**"
+        )
         a.line_chart(
             df.set_index("frame_number")[
-                ["objects_detected", "active_tracks", "roi_objects"]
+                ["active_vehicles"]
+                if manifest.get("traffic")
+                else ["objects_detected", "active_tracks", "roi_objects"]
             ]
         )
         b.markdown("**Class distribution over time**")
@@ -356,6 +388,8 @@ elif page == "Export Center":
             runDir / "run.json",
         ]
         choices += sorted((runDir / "charts").glob("*.png"))
+        if (runDir / "crossing_events.csv").exists():
+            choices.append(runDir / "crossing_events.csv")
         for path in choices:
             st.download_button(
                 f"Download {path.name}", path.read_bytes(), path.name, key=str(path)
@@ -370,6 +404,8 @@ else:
     st.markdown("""**Official requirements**: Gaussian filtering, adaptive threshold matrices, pixel-bound contour extraction, dynamic class counts, frame metrics and a performance whitepaper.
 
 **Engineering additions**: from-scratch centroid tracking, bounded trails, ROI counts, one-crossing-per-ID analytics, pretrained detection and instance masks, reproducible synthetic ground truth, exported media and interactive inspection.
+
+**Traffic showcase**: vehicle-only detection, short trails, a horizontal or vertical counting line, Direction A/B counts and timestamped crossing events. Active vehicle counts describe visible detections, not congestion or traffic density. The showcase does not optimize signals or claim production deployment.
 
 **Interpretation matters**: contours classify geometry, YOLO detection produces boxes, and the segmentation model produces instance masks. Runtime is not detection accuracy. The synthetic benchmark uses separated shapes and does not establish robustness to real-world occlusion.
 

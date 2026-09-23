@@ -1,15 +1,22 @@
 # Vision Intelligence
 
-**OpenCV contour segmentation, pretrained detection, instance masks and persistent tracking - with evidence for every result.**
+**Turning traffic footage into vehicle-flow analytics.**
 
-Built by **Fayz Liaqat** for **Progree Artificial Intelligence Internship, Task 4**. The classical pipeline satisfies Gaussian filtering, adaptive thresholds, pixel-bound extraction, dynamic count overlays and frame-level evaluation. Pretrained YOLO is a separate enhancement.
+Traffic cameras generate hours of video, but extracting vehicle classes, visible counts and movement by hand is slow. Vision Intelligence converts video into tracked detections, directional crossing events and frame-level telemetry, with annotated video and CSV exports.
 
-![Actual Streamlit workspace](docs/demo/streamlit_dashboard.png)
+**Python · OpenCV · YOLOv8 / instance segmentation · ByteTrack · Streamlit**
 
-[Watch the annotated 8-second demo](outputs/videos/opencv_segmented_output.mp4) · [Read the six-page whitepaper](report/Task_4_Whitepaper.pdf) · [Read the Markdown report](report/Task_4_Whitepaper.md)
+![Actual vehicle-flow analysis](outputs/traffic/frames/frame_0191_tracked.png)
+
+[Watch the 28-second showcase](docs/linkedin/linkedin_demo.mp4) · [Traffic results](report/Traffic_Demonstration.md) · [Six-page whitepaper](report/Task_4_Whitepaper.pdf)
+
+On the supplied **15.28-second traffic clip**, the CPU run processed **382 frames**, recorded **10 crossings (A: 2 / B: 8)** and measured **21.77 processing FPS**. This is throughput with documented exclusions, not accuracy or end-to-end deployment speed.
+
+Traffic Analytics is the flagship **showcase use case** within a general vision project. The original classical pipeline and inspector remain intact. Built by **Fayz Liaqat** for **Progree Artificial Intelligence Internship, Task 4**.
 
 ## What it does
 
+- **Traffic Analytics:** vehicle-only inference, active counts, horizontal/vertical Direction A/B crossings, short trails and timestamped event CSVs.
 - **Classical vision:** configurable Gaussian/adaptive stages, morphology, area bounds and geometric Circle / Rectangle / Triangle / Other labels.
 - **Tracking and counting:** from-scratch centroid association, 24-point trails, ROI class counts and one-crossing-per-ID counting with a deadband.
 - **Deep vision:** optional YOLOv8n detection and YOLOv8n-seg instance masks; ByteTrack IDs for videos. Missing dependencies or weights leave classical processing operational.
@@ -53,7 +60,7 @@ The threshold mask can have hollow interiors. External contours recover enclosed
 
 Additional engineering includes deterministic ground truth, geometric tracking IDs, trails, ROI and crossing counts, dashboard controls, frame inspection, H.264 export, ByteTrack and pretrained instance segmentation. No training, database, API server or cloud infrastructure was added.
 
-## Measured results
+## Controlled synthetic evaluation
 
 A complete synthetic run: **240 frames · 960 x 540 · 30 source FPS · 8 seconds · seed 42**. Mild noise, three persistent shapes and a smaller circle visible on frames 46-190. Separate lanes avoid occlusion.
 
@@ -76,7 +83,9 @@ These measurements come from [frame_metrics.csv](outputs/frame_metrics.csv) and 
 
 **Controlled correctness:** 865 matched object-frame instances, zero unmatched predictions, zero misses, zero count MAE and zero matched ID changes. Matching is one-to-one within 20 pixels. Shape labels were correct on all matches. This easy benchmark does **not** establish real-world accuracy, mAP or robust occlusion handling. See [synthetic_evaluation.json](outputs/synthetic_evaluation.json) for definitions.
 
-## Pretrained vision: tested, separately scoped
+## Pretrained vision: detection and instance segmentation
+
+Both models now run on the supplied traffic footage; [traffic evidence](report/Traffic_Demonstration.md) is separate from synthetic evaluation. The original integration smoke tests below are retained.
 
 Both models ran on the attributed Ultralytics bus image and a 20-frame translated-photo clip. Detection returned real boxes; segmentation returned six instance masks on the still image. Both video exports were read back successfully with persistent IDs. This verifies integration, not natural-motion tracking quality. First-inference startup remains in the CSV. No speed ranking is made against the differently sized classical benchmark.
 
@@ -131,15 +140,16 @@ Press **q** to exit. An unavailable camera prints an actionable message and exit
 
 ## Dashboard workflow
 
-1. In **Live Vision Pipeline**, use the demo or upload MP4, adjust parameters and select **Process video**.
-2. **Frame Analysis** inspects early, middle and later saved frames without rerunning inference.
-3. **Performance Dashboard** shows real telemetry and the saved configuration.
-4. **Deep Vision** runs pretrained boxes or instance masks on a real-world image/video.
-5. **Export Center** downloads videos, CSVs and charts.
+1. Start in **Traffic Analytics** to play the measured showcase or process clean traffic footage. Use **Load saved traffic showcase** to return to canonical evidence.
+2. In **Live Vision Pipeline**, use the demo or upload MP4, adjust parameters and select **Process video**.
+3. **Frame Analysis** inspects early, middle and later saved frames without rerunning inference.
+4. **Performance Dashboard** shows real telemetry and the saved configuration.
+5. **Deep Vision** runs pretrained boxes or instance masks on a real-world image/video.
+6. **Export Center** downloads videos, CSVs and charts.
 
 Each interactive run uses `outputs/runs/<generated-id>/`. Uploaded names cannot choose arbitrary paths. These local runs are ignored by Git and persist until removed. Exported videos do not retain audio.
 
-![Actual performance dashboard](docs/demo/streamlit_performance.png)
+![Actual traffic workspace](docs/demo/traffic_dashboard.png)
 
 ## Project structure
 
@@ -155,12 +165,15 @@ src/
   yolo_detector.py             Lazy optional models + ByteTrack
   video_processor.py           Shared engine, overlays, video I/O
   metrics.py                   Statistics and figures
+  traffic.py                   Vehicle metrics and compact traffic overlays
+  traffic_page.py              Traffic Analytics preset and event audit
 notebooks/                     Two executed instructional notebooks
 data/                          Sample MP4, truth, attributed deep sample
 outputs/                       CSVs, videos, frames, charts and metadata
 report/                        Six-page PDF and Markdown whitepaper
 docs/demo/                     Actual app screenshots and showcase figures
-scripts/                       Deep verification and report builder
+docs/linkedin/                 28-second video, caption, edit script, checklist
+scripts/                       Deep verification, report and local video builders
 tests/                         Pipeline and Streamlit AppTest coverage
 ```
 
@@ -170,12 +183,18 @@ tests/                         Pipeline and Streamlit AppTest coverage
 
 - Dark foreground on a bright background is the classical default. Texture, scale and overlapping contours require retuning.
 - Greedy association can switch IDs. Unique IDs need not equal unique physical objects.
-- A line counts **once per track ID per run**. Entered means left-to-right; exited means right-to-left.
+- A line counts **once per track ID per run**. Traffic uses Direction A/B: horizontal means top-to-bottom / bottom-to-top; vertical means left-to-right / right-to-left. Legacy classical CSVs retain entered/exited fields.
 - ROI uses centroid inclusion, not mask overlap. Full-frame detection remains active.
 - Synthetic quality is not semantic segmentation accuracy or natural-scene accuracy.
 - UI processing is batch-on-demand. Camera processing is a separate local script; no browser webcam streaming, cancellation or cloud deployment is claimed.
 - Large uploads consume time and local storage. The app limits uploads to 100 MB.
 - CPU model startup can be slow. No GPU performance was measured.
+
+## Core CI and verification
+
+[Core checks](.github/workflows/core-tests.yml) install only core dependencies, compile Python, run Ruff E9/F and execute unit/AppTest coverage. They do not install Ultralytics or download weights; model integration is verified locally. See [verification](docs/VERIFICATION.md).
+
+No project software license has been selected. The owner can choose one separately; media permission is documented in THIRD_PARTY_NOTICES.md.
 
 ## Demo recording
 

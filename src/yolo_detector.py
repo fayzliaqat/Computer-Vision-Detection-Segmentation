@@ -6,7 +6,9 @@ import time
 
 
 class YoloDetector:
-    def __init__(self, segmentation=False, confidence=0.25, tracking=True):
+    def __init__(
+        self, segmentation=False, confidence=0.25, tracking=True, classNames=None
+    ):
         if not 0 < confidence <= 1:
             raise ValueError("Confidence must be in (0, 1]")
         root = Path(__file__).resolve().parents[1]
@@ -26,10 +28,19 @@ class YoloDetector:
         self.confidence, self.tracking = confidence, tracking
         self.segmentation = segmentation
         self.modelName = modelName
+        self.classIds = None
+        if classNames is not None:
+            self.classIds = [
+                index for index, name in self.model.names.items() if name in classNames
+            ]
+            if not self.classIds or len(self.classIds) != len(set(classNames)):
+                raise ValueError("Select at least one supported model class")
 
     def detect(self, frame):
         start = time.perf_counter()
         args = dict(conf=self.confidence, verbose=False, device="cpu", imgsz=640)
+        if self.classIds is not None:
+            args["classes"] = self.classIds
         if self.tracking:
             result = self.model.track(
                 frame, persist=True, tracker="bytetrack.yaml", **args

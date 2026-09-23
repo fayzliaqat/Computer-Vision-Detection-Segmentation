@@ -50,13 +50,26 @@ class CentroidTracker:
 class SceneAnalytics:
     """ROI uses centroid inclusion; one crossing per ID per run, with deadband."""
 
-    def __init__(self, roi=None, line=None, deadband=4):
+    def __init__(
+        self,
+        roi=None,
+        line=None,
+        deadband=4,
+        lineOrientation="vertical",
+        trailLength=24,
+    ):
         if roi is not None and not (
             0 <= roi[0] < roi[2] <= 1 and 0 <= roi[1] < roi[3] <= 1
         ):
             raise ValueError("ROI must be normalized left, top, right, bottom")
         if line is not None and not 0 < line < 1:
             raise ValueError("Line position must be between zero and one")
+        if lineOrientation not in ("vertical", "horizontal"):
+            raise ValueError("Line orientation must be vertical or horizontal")
+        if not 2 <= trailLength <= 60:
+            raise ValueError("Trail length must be between 2 and 60 frames")
+        self.lineOrientation, self.trailLength = lineOrientation, trailLength
+        self.events = []
         self.roi, self.line, self.deadband = roi, line, deadband
         self.sides, self.counted, self.histories, self.lastSeen = {}, set(), {}, {}
         self.entered = self.exited = self.frame = 0
@@ -76,10 +89,15 @@ class SceneAnalytics:
             trackId = det.get("track_id")
             if trackId is None:
                 continue
-            self.histories.setdefault(trackId, deque(maxlen=24)).append((x, y))
+            self.histories.setdefault(trackId, deque(maxlen=self.trailLength)).append(
+                (x, y)
+            )
             self.lastSeen[trackId] = self.frame
             if self.line is not None:
-                delta = x - self.line * width
+                coordinate, extent = (
+                    (x, width) if self.lineOrientation == "vertical" else (y, height)
+                )
+                delta = coordinate - self.line * extent
                 side = (
                     1 if delta > self.deadband else -1 if delta < -self.deadband else 0
                 )
@@ -88,6 +106,16 @@ class SceneAnalytics:
                     self.entered += int(side == 1)
                     self.exited += int(side == -1)
                     self.counted.add(trackId)
+                    self.events.append(
+                        {
+                            "frame_number": self.frame,
+                            "track_id": trackId,
+                            "class": det["label"],
+                            "direction": "A" if side == 1 else "B",
+                            "center_x": x,
+                            "center_y": y,
+                        }
+                    )
                 if side:
                     self.sides[trackId] = side
         for trackId in list(self.lastSeen):

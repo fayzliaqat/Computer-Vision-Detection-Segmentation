@@ -1,5 +1,19 @@
 # Verification record
 
+## Final traffic showcase pass — 2026-09-23
+
+- **Working environment:** all 15 unittest/AppTest checks passed. Horizontal and legacy vertical crossing behavior, deadband jitter, once-per-ID events, class filtering, event timestamps, video export and saved-run count consistency are covered.
+- **Clean core environment:** all 15 tests passed without Ultralytics installed or model downloads. The lightweight GitHub Actions workflow installs only core requirements and Ruff.
+- **Actual traffic execution:** all 382 clean source frames processed with YOLOv8n + unchanged ByteTrack association. Source: 1280×720, 25 FPS, 15.28 seconds. Recorded 10 crossings (A=2, B=8), mean processing 45.931 ms / 21.772 processing FPS. First inference remains included; no ground-truth accuracy claim. Full results: [traffic addendum](../report/Traffic_Demonstration.md).
+- **Actual segmentation:** YOLOv8n-seg processed the first 100 traffic frames and exported instance masks. Both detection and segmentation also completed in the live Deep Vision image UI.
+- **Streamlit browser review:** actual Edge browser visited all seven pages. Traffic Analytics processed the real video; Frame Analysis displayed the retained classical stages; Performance used the canonical traffic CSV; Export Center exposed crossing events; Deep Vision displayed completed detection and segmentation. Screenshots are under `docs/demo/`. Browser automation initially raced app startup/upload rerenders; readiness waits and a fresh server resolved it. These were automation failures, not silently counted as passes.
+- **Visual review:** beginning, middle, end and all ten crossing-event frames inspected. Shorter labels/trails, a dashed horizontal line and an appended HUD preserve scene visibility. No evidence justified tracker association changes or ID renumbering.
+- **LinkedIn export:** actual locally rendered composite, **28.00 seconds, 1920×1080, 30 FPS, H.264/yuv420p, 840 frames**, silent. Full frame readback passed. Keyframes across every segment and transitions inspected. The typed composition tool initially produced yuv444p; native FFmpeg rerender explicitly corrected it to yuv420p. [Media validation and hashes](linkedin/media_validation.json).
+- **Static and artifact checks:** Ruff E9/F and compilation passed; both executed notebooks retain outputs without errors; local Markdown links resolve; common credential-pattern scan found no matches. Model weights, private interactive uploads, caches and temporary files remain ignored. Largest deliverable is the approximately 10.6 MB final video.
+- **Preservation:** synthetic benchmark artifacts and six-page whitepaper unchanged. No software license chosen. User explicitly permitted redistribution of the clean source and edited footage; permission is recorded in `THIRD_PARTY_NOTICES.md`.
+
+## Original project verification
+
 Verified locally on Windows with Python 3.13.3. Canonical measurements are in `outputs/frame_metrics.csv`, `summary_metrics.csv`, `run.json` and `synthetic_evaluation.json`.
 
 ## Required checks
@@ -47,4 +61,4 @@ Verified locally on Windows with Python 3.13.3. Canonical measurements are in `o
 
 ## Scope and manual checks
 
-The physical webcam has not been tested: verify camera permissions and device selection locally. YOLO's translated-photo clip is an integration test, not a natural-motion benchmark. Synthetic correctness applies to separated geometric shapes. Test representative real footage before making broader accuracy or tracking claims. Videos omit audio. Local interactive runs persist until removed.
+The physical webcam has not been tested: verify camera permissions and device selection locally. YOLO's translated-photo clip is an integration test; the separate traffic showcase supplies natural-motion evidence without labeled accuracy. Synthetic correctness applies to separated geometric shapes. Videos omit audio. Local interactive runs persist until removed.

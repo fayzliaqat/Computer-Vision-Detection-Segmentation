@@ -10,6 +10,7 @@ class DashboardTests(unittest.TestCase):
         app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=60).run()
         self.assertFalse(app.exception)
         for page in [
+            "Traffic Analytics",
             "Frame Analysis",
             "Performance Dashboard",
             "Deep Vision",

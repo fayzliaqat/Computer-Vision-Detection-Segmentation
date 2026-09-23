@@ -1,0 +1,13 @@
+{
+  "input": "data/cars.mp4",
+  "sha256": "afc682154fa788437dfa466a9723df13a12fdc08b6f0a5add06cf2910e90b006",
+  "permission": "User asserted ownership and explicitly permitted public redistribution of source and derivatives on 2026-09-23.",
+  "source_url": null,
+  "clean_source_recovery": "Byte-identical to the saved upload underlying the originally supplied annotated export.",
+  "scene": "Fixed elevated camera; divided multi-lane road in daylight. Left carriageway moves toward the top; right carriageway toward the bottom. Perspective, roadside poles and occasional partial occlusion.",
+  "line_orientation": "horizontal",
+  "line_position": 0.55,
+  "direction_a": "top to bottom",
+  "direction_b": "bottom to top",
+  "review_scope": "Beginning, middle, end, and each logged crossing frame inspected. No ground-truth annotations or accuracy assessment."
+}

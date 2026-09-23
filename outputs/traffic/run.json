@@ -1,0 +1,94 @@
+{
+  "summary": {
+    "total_frames": 382,
+    "successful_frames": 382,
+    "average_processing_time_ms": 45.93056492146022,
+    "median_processing_time_ms": 37.643999996362254,
+    "minimum_processing_time_ms": 33.56100001838058,
+    "maximum_processing_time_ms": 3020.296300004702,
+    "p95_processing_time_ms": 41.7320899956394,
+    "average_fps": 26.255547581517767,
+    "minimum_fps": 0.33109334339099217,
+    "maximum_fps": 29.796489957162276,
+    "aggregate_processing_fps": 21.77199435081993,
+    "average_objects_per_frame": 20.589005235602095,
+    "maximum_objects_detected": 26,
+    "unique_tracks": 131,
+    "mode": "detection",
+    "source_fps": 25.0,
+    "width": 1280,
+    "height": 720,
+    "source_frame_count": 382,
+    "codec": "H.264 / yuv420p",
+    "processing_export_validation_seconds": 31.957167399988975,
+    "entered": 2,
+    "exited": 8,
+    "duration_seconds": 15.28,
+    "output_height": 802,
+    "mean_active_vehicles": 20.589005235602095,
+    "peak_active_vehicles": 26,
+    "final_active_vehicles": 23,
+    "direction_a": 2,
+    "direction_b": 8,
+    "total_crossings": 10,
+    "mean_inference_time_ms": 41.79940575868481,
+    "vehicle_classes": {
+      "car": {
+        "mean_visible": 17.078534031413614,
+        "peak_visible": 21
+      },
+      "truck": {
+        "mean_visible": 3.081151832460733,
+        "peak_visible": 7
+      },
+      "bus": {
+        "mean_visible": 0.4293193717277487,
+        "peak_visible": 3
+      },
+      "motorcycle": {
+        "mean_visible": 0.0,
+        "peak_visible": 0
+      },
+      "bicycle": {
+        "mean_visible": 0.0,
+        "peak_visible": 0
+      }
+    }
+  },
+  "config": {
+    "gaussianKernel": 5,
+    "blockSize": 31,
+    "thresholdC": 7,
+    "adaptiveMethod": "Gaussian",
+    "morphologyKernel": 3,
+    "minArea": 250,
+    "maxArea": 20000,
+    "maxDistance": 55,
+    "maxDisappeared": 10
+  },
+  "roi": null,
+  "line": 0.55,
+  "line_orientation": "horizontal",
+  "traffic": true,
+  "vehicle_classes": [
+    "car",
+    "truck",
+    "bus",
+    "motorcycle",
+    "bicycle"
+  ],
+  "tracking": true,
+  "confidence": 0.3,
+  "representative_frames": [
+    1,
+    191,
+    382
+  ],
+  "video": "videos/traffic_annotated.mp4",
+  "input_name": "cars.mp4",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+  "python": "3.13.3",
+  "opencv": "4.11.0",
+  "timing_scope": "Preprocess/inference + association + analytics + overlays; excludes decode, HUD, encoding, disk I/O and model load. First inference included."
+}

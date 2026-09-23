@@ -15,6 +15,14 @@ from .preprocessing import VisionConfig, preprocessFrame
 from .segmentation import extractContours
 from .tracking import CentroidTracker, SceneAnalytics
 from .metrics import summarizeMetrics, createCharts, pipelineFigure
+from .traffic import (
+    VEHICLE_CLASSES,
+    TRAFFIC_FOOTER,
+    vehicleCounts,
+    summarizeTraffic,
+    trafficOverlay,
+    trafficHud,
+)
 
 COLORS = {
     "Circle": (176, 201, 54),
@@ -75,8 +83,12 @@ def annotate(frame, detections, analytics, trails=True, masks=False):
             1,
         )
     if analytics.line is not None:
-        x = int(analytics.line * width)
-        cv2.line(output, (x, 0), (x, height), (100, 200, 255), 2)
+        if analytics.lineOrientation == "vertical":
+            x = int(analytics.line * width)
+            cv2.line(output, (x, 0), (x, height), (100, 200, 255), 2)
+        else:
+            y = int(analytics.line * height)
+            cv2.line(output, (0, y), (width, y), (100, 200, 255), 2)
     return output
 
 
@@ -116,12 +128,31 @@ class FrameProcessor:
         roi=None,
         line=None,
         trails=True,
+        traffic=False,
+        lineOrientation="vertical",
+        vehicleClasses=None,
     ):
         if mode not in ("classical", "detection", "segmentation"):
             raise ValueError("Unknown vision mode")
         self.config = (config or VisionConfig()).validate()
         self.mode, self.trails = mode, trails
-        self.analytics = SceneAnalytics(roi, line)
+        if traffic and mode != "detection":
+            raise ValueError("The traffic preset uses object detection")
+        self.traffic = traffic
+        self.vehicleClasses = tuple(
+            VEHICLE_CLASSES if vehicleClasses is None else vehicleClasses
+        )
+        if traffic and (
+            not self.vehicleClasses
+            or not set(self.vehicleClasses) <= set(VEHICLE_CLASSES)
+        ):
+            raise ValueError("Choose at least one supported vehicle class")
+        self.analytics = SceneAnalytics(
+            roi,
+            line,
+            lineOrientation=lineOrientation,
+            trailLength=12 if traffic else 24,
+        )
         self.tracker = CentroidTracker(
             self.config.maxDistance, self.config.maxDisappeared
         )
@@ -130,7 +161,12 @@ class FrameProcessor:
         if mode != "classical":
             from .yolo_detector import YoloDetector
 
-            self.deep = YoloDetector(mode == "segmentation", confidence, tracking)
+            self.deep = YoloDetector(
+                mode == "segmentation",
+                confidence,
+                tracking,
+                classNames=self.vehicleClasses if traffic else None,
+            )
 
     def process(self, frame, frameNumber, sourceFps):
         start = time.perf_counter()
@@ -142,6 +178,10 @@ class FrameProcessor:
         else:
             stages = {"original": frame.copy()}
             detections, inferenceMs = self.deep.detect(frame)
+            if self.traffic:
+                detections = [
+                    d for d in detections if d["label"] in self.vehicleClasses
+                ]
             rawCount = None
         height, width = frame.shape[:2]
         roiCounts = self.analytics.update(detections, width, height)
@@ -156,8 +196,16 @@ class FrameProcessor:
         stages["segmented"] = annotate(
             frame, untracked, self.analytics, False, self.mode == "segmentation"
         )
-        tracked = annotate(
-            frame, detections, self.analytics, self.trails, self.mode == "segmentation"
+        tracked = (
+            trafficOverlay(frame, detections, self.analytics, self.trails)
+            if self.traffic
+            else annotate(
+                frame,
+                detections,
+                self.analytics,
+                self.trails,
+                self.mode == "segmentation",
+            )
         )
         elapsed = max((time.perf_counter() - start) * 1000, 1e-9)
         row = {
@@ -180,7 +228,21 @@ class FrameProcessor:
         }
         for label in ("Circle", "Rectangle", "Triangle", "Other"):
             row[label.lower() + "_count"] = counts.get(label, 0)
-        stages["tracked"] = drawHud(tracked, row, self.mode)
+        if self.traffic:
+            vehicles = vehicleCounts(detections)
+            row.update(
+                active_vehicles=sum(vehicles.values()),
+                vehicle_class_counts=json.dumps(vehicles),
+                direction_a=self.analytics.entered,
+                direction_b=self.analytics.exited,
+                total_crossings=self.analytics.entered + self.analytics.exited,
+                line_orientation=self.analytics.lineOrientation,
+            )
+        stages["tracked"] = (
+            trafficHud(tracked, row)
+            if self.traffic
+            else drawHud(tracked, row, self.mode)
+        )
         return stages, row, detections
 
 
@@ -251,6 +313,9 @@ def processVideo(
     trails=True,
     progress=None,
     maxFrames=None,
+    traffic=False,
+    lineOrientation="vertical",
+    vehicleClasses=None,
 ):
     inputPath, outputDir = Path(inputPath), Path(outputDir)
     outputDir.mkdir(parents=True, exist_ok=True)
@@ -267,9 +332,13 @@ def processVideo(
     expected = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     width, height = int(capture.get(3)), int(capture.get(4))
     filename = (
-        "opencv_segmented_output.mp4"
-        if mode == "classical"
-        else f"yolo_{mode}_output.mp4"
+        "traffic_annotated.mp4"
+        if traffic
+        else (
+            "opencv_segmented_output.mp4"
+            if mode == "classical"
+            else f"yolo_{mode}_output.mp4"
+        )
     )
     outputPath = outputDir / "videos" / filename
     if inputPath.resolve() == outputPath.resolve():
@@ -279,13 +348,28 @@ def processVideo(
     rows, objects, savedFrames = [], [], []
     wallStart = time.perf_counter()
     try:
-        engine = FrameProcessor(config, mode, confidence, tracking, roi, line, trails)
+        engine = FrameProcessor(
+            config,
+            mode,
+            confidence,
+            tracking,
+            roi,
+            line,
+            trails,
+            traffic,
+            lineOrientation,
+            vehicleClasses,
+        )
+        outputHeight = height + TRAFFIC_FOOTER if traffic else height
         writer = cv2.VideoWriter(
-            str(outputPath), cv2.VideoWriter_fourcc(*"mp4v"), sourceFps, (width, height)
+            str(outputPath),
+            cv2.VideoWriter_fourcc(*"mp4v"),
+            sourceFps,
+            (width, outputHeight),
         )
         if not writer.isOpened():
             raise RuntimeError("MP4 writer unavailable")
-        selected = {1, max(1, expected // 2), max(1, expected - 1)}
+        selected = {1, max(1, expected // 2), max(1, expected)}
         while maxFrames is None or len(rows) < maxFrames:
             ok, frame = capture.read()
             if not ok:
@@ -347,8 +431,25 @@ def processVideo(
             "processing_export_validation_seconds": time.perf_counter() - wallStart,
             "entered": engine.analytics.entered,
             "exited": engine.analytics.exited,
+            "duration_seconds": len(rows) / sourceFps,
+            "output_height": outputHeight,
         }
     )
+    if traffic:
+        summary.update(summarizeTraffic(df))
+        events = pd.DataFrame(
+            engine.analytics.events,
+            columns=[
+                "frame_number",
+                "track_id",
+                "class",
+                "direction",
+                "center_x",
+                "center_y",
+            ],
+        )
+        events["timestamp_seconds"] = (events.frame_number - 1) / sourceFps
+        events.to_csv(outputDir / "crossing_events.csv", index=False)
     pd.DataFrame([summary]).to_csv(outputDir / "summary_metrics.csv", index=False)
     createCharts(df, outputDir / "charts")
     manifest = {
@@ -356,6 +457,9 @@ def processVideo(
         "config": asdict(engine.config),
         "roi": roi,
         "line": line,
+        "line_orientation": lineOrientation,
+        "traffic": traffic,
+        "vehicle_classes": list(engine.vehicleClasses) if traffic else None,
         "tracking": tracking,
         "confidence": confidence,
         "representative_frames": savedFrames,

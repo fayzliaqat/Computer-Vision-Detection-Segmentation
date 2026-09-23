@@ -1,0 +1,53 @@
+{
+  "videos": [
+    {
+      "path": "data/cars.mp4",
+      "width": 1280,
+      "height": 720,
+      "fps": "25/1",
+      "frames": 382,
+      "duration_seconds": 15.28,
+      "codec": "h264",
+      "pixel_format": "yuv420p",
+      "bytes": 8142686,
+      "sha256": "afc682154fa788437dfa466a9723df13a12fdc08b6f0a5add06cf2910e90b006"
+    },
+    {
+      "path": "outputs/traffic/videos/traffic_annotated.mp4",
+      "width": 1280,
+      "height": 802,
+      "fps": "25/1",
+      "frames": 382,
+      "duration_seconds": 15.28,
+      "codec": "h264",
+      "pixel_format": "yuv420p",
+      "bytes": 5500797,
+      "sha256": "c7dd7ab97512b6eda3534a0c282485acdfb03a1079a8de216dcf25a18bc6613f"
+    },
+    {
+      "path": "outputs/traffic_segmentation/videos/yolo_segmentation_output.mp4",
+      "width": 1280,
+      "height": 720,
+      "fps": "25/1",
+      "frames": 100,
+      "duration_seconds": 4.0,
+      "codec": "h264",
+      "pixel_format": "yuv420p",
+      "bytes": 1650899,
+      "sha256": "0d1da356152baf9ba7427d574d0052028cd5177b5f40ae3062e4d9b9c6777939"
+    },
+    {
+      "path": "docs/linkedin/linkedin_demo.mp4",
+      "width": 1920,
+      "height": 1080,
+      "fps": "30/1",
+      "frames": 840,
+      "duration_seconds": 28.0,
+      "codec": "h264",
+      "pixel_format": "yuv420p",
+      "bytes": 10597117,
+      "sha256": "03ac4f83a595cd8f01992281e5e3ff431139dff1b11b97fe24c453b46ea22047"
+    }
+  ],
+  "method": "FFprobe metadata and complete OpenCV frame readback; beginning, middle, end and transitions visually reviewed separately."
+}

@@ -1,16 +1,17 @@
-# Showcase recording guide
+# Showcase assets
 
-Record the actual local app at a desktop resolution. Use the existing generated artifacts; no screen mocks are needed.
+The finished [short LinkedIn composite](../linkedin/linkedin_demo.mp4) uses real traffic analysis, classical pipeline stages, instance masks and a running-app dashboard capture. See the [edit script](../linkedin/linkedin_demo_script.md) for source paths, timestamps and rebuild instructions, and the [caption](../linkedin/linkedin_caption.md) for posting text.
 
-1. **0-8 seconds:** show the landing page and play the annotated shapes demo. Point out persistent IDs and dynamic class counts.
-2. **8-20 seconds:** open Frame Analysis and compare grayscale, blur, adaptive threshold and contour output.
-3. **20-30 seconds:** open Performance Dashboard; explain source FPS versus processing FPS and P95 latency.
-4. **30-45 seconds:** open Deep Vision and upload data/bus.jpg for actual detection or instance masks. Mention pretrained YOLO explicitly.
-5. **45-55 seconds:** show Export Center and the six-page whitepaper.
+## Current traffic review
 
-Do not describe the translated bus-photo smoke test as real traffic tracking. Do not quote synthetic correctness as general-world detection accuracy. Webcam operation depends on local hardware; the browser app processes uploaded video on demand.
+- `traffic_dashboard.png`: actual Traffic Analytics page, with canonical completed-run metrics.
+- `traffic_performance.png`: actual traffic Performance Dashboard, including first-inference startup.
+- `traffic_deep_vision.png`: completed instance segmentation on an actual traffic image in Deep Vision.
+- `classical_inspector_current.png`: preserved classical pipeline inspector.
 
-## Included assets
+The translated-photo smoke test remains integration evidence, not natural traffic validation. Webcam operation depends on local hardware; the browser app processes uploaded video on demand.
+
+## Retained project evidence
 
 - streamlit_dashboard.png, streamlit_inspector.png, streamlit_performance.png, streamlit_deep_vision.png: actual running app captures.
 - architecture.png: implementation architecture.

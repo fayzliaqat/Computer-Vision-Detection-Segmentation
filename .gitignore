@@ -14,3 +14,8 @@ tmp/
 *.log
 Ultralytics/
 .ruff_cache/
+
+# Original annotated upload retained locally; clean source permission documented
+data/real_world_traffic_test.mp4
+outputs/traffic_private/
+docs/linkedin/private/

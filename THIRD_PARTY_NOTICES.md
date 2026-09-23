@@ -18,3 +18,13 @@ The repository distributes Ultralytics under AGPL-3.0, with separate commercial 
 ## Other dependencies
 
 OpenCV, NumPy, Pandas, Matplotlib, Streamlit, Jupyter, ReportLab and their dependencies retain their respective upstream licenses. FFmpeg is an external executable; it is not redistributed here.
+
+## User-provided traffic footage
+
+- Source: Fayz Liaqat supplied `data/cars.mp4` locally on 2026-09-23. No external source URL was supplied.
+- Permission: the user explicitly stated, “I own it and permit public redistribution,” covering the footage and edited versions for this repository and showcase. This records the user-provided permission; independent chain-of-title verification was not performed.
+- The earlier `data/real_world_traffic_test.mp4` was an already annotated export. Its SHA-256 matched a saved application's output. The clean saved upload was byte-identical to the newly supplied `cars.mp4`; only the clean source is included.
+- Derivatives: `outputs/traffic/`, `outputs/traffic_segmentation/`, traffic dashboard screenshots, and `docs/linkedin/linkedin_demo.mp4`.
+- The original annotated upload, redundant recovered copy, private uploads and temporary review files are not published.
+
+No new software license has been selected for this repository. A software license remains an owner decision, separate from this media permission.
