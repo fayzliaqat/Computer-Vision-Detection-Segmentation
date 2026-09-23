@@ -2,6 +2,10 @@
 
 **Turning traffic footage into vehicle-flow analytics.**
 
+**Try the live app:** [vision-intelligence-fayz.streamlit.app](https://vision-intelligence-fayz.streamlit.app/)
+
+Visitors can upload a clean traffic MP4 up to **50 MB and 30 seconds** and run CPU-based YOLOv8n vehicle detection, ByteTrack tracking and directional counting on the public Streamlit deployment.
+
 Traffic cameras generate hours of video, but extracting vehicle classes, visible counts and movement by hand is slow. Vision Intelligence converts video into tracked detections, directional crossing events and frame-level telemetry, with annotated video and CSV exports.
 
 **Python · OpenCV · YOLOv8 / instance segmentation · ByteTrack · Streamlit**
@@ -58,7 +62,7 @@ The threshold mask can have hollow interiors. External contours recover enclosed
 | Performance whitepaper | Six-page PDF and Task_4_Whitepaper.md |
 <!-- REQUIREMENTS_END -->
 
-Additional engineering includes deterministic ground truth, geometric tracking IDs, trails, ROI and crossing counts, dashboard controls, frame inspection, H.264 export, ByteTrack and pretrained instance segmentation. No training, database, API server or cloud infrastructure was added.
+Additional engineering includes deterministic ground truth, geometric tracking IDs, trails, ROI and crossing counts, dashboard controls, frame inspection, H.264 export, ByteTrack and pretrained instance segmentation. No model training, database or API server was added.
 
 ## Controlled synthetic evaluation
 
@@ -97,7 +101,7 @@ See [YOLO verification](outputs/yolo_verification.json) and [attribution](THIRD_
 
 ## Install and run
 
-Python **3.13** was tested on Windows. Create an isolated environment in this repository:
+Python **3.13** was tested on Windows. The main requirements include the optional YOLO stack for the live cloud app. Create an isolated environment in this repository:
 
 ```powershell
 python -m venv .venv
@@ -108,13 +112,13 @@ python -m streamlit run app.py
 
 On macOS/Linux activate with `source .venv/bin/activate`. Install [FFmpeg](https://ffmpeg.org/download.html) and put `ffmpeg` on PATH for browser-compatible H.264. Without it, OpenCV exports mp4v, which some browsers cannot play; downloads and frame images remain usable.
 
-For optional pretrained models:
+To install only the lightweight classical app and core test dependencies:
 
 ```powershell
-python -m pip install -r requirements-yolo.txt
+python -m pip install -r requirements-core.txt
 ```
 
-Open **Deep Vision**, choose detection or instance segmentation, upload JPG/PNG/MP4 and run. First use needs internet to download weights. Inference is explicitly on CPU. COCO classes do not include abstract benchmark shapes; use real-world media.
+On first use, YOLO downloads its pretrained weights; weights are not stored in Git. Inference uses CPU. Traffic Analytics accepts MP4 uploads up to 50 MB and 30 seconds on the public demo. Deep Vision supports its existing detection and instance segmentation workflows. COCO classes do not include abstract benchmark shapes; use real-world media.
 
 ## Reproduce the evidence
 
@@ -186,13 +190,13 @@ tests/                         Pipeline and Streamlit AppTest coverage
 - A line counts **once per track ID per run**. Traffic uses Direction A/B: horizontal means top-to-bottom / bottom-to-top; vertical means left-to-right / right-to-left. Legacy classical CSVs retain entered/exited fields.
 - ROI uses centroid inclusion, not mask overlap. Full-frame detection remains active.
 - Synthetic quality is not semantic segmentation accuracy or natural-scene accuracy.
-- UI processing is batch-on-demand. Camera processing is a separate local script; no browser webcam streaming, cancellation or cloud deployment is claimed.
-- Large uploads consume time and local storage. The app limits uploads to 100 MB.
+- UI processing is batch-on-demand. The public traffic demo limits uploads to 50 MB and 30 seconds; this is a short-clip showcase, not production-scale processing. Camera processing is a separate local script; there is no browser webcam streaming or cancellation.
+- Other upload pages follow the Streamlit app's 100 MB upload setting. Large videos can still take substantial time and local storage.
 - CPU model startup can be slow. No GPU performance was measured.
 
 ## Core CI and verification
 
-[Core checks](.github/workflows/core-tests.yml) install only core dependencies, compile Python, run Ruff E9/F and execute unit/AppTest coverage. They do not install Ultralytics or download weights; model integration is verified locally. See [verification](docs/VERIFICATION.md).
+[Core checks](.github/workflows/core-tests.yml) install only `requirements-core.txt`, compile Python, run Ruff E9/F and execute unit/AppTest coverage. They do not install Ultralytics or download weights; model integration is verified locally. See [verification](docs/VERIFICATION.md).
 
 No project software license has been selected. The owner can choose one separately; media permission is documented in THIRD_PARTY_NOTICES.md.
 

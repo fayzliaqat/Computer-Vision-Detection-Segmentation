@@ -17,7 +17,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg libgl1
-          python -m pip install -r requirements.txt ruff
+          python -m pip install -r requirements-core.txt ruff
       - name: Compile and lint
         run: |
           python -m compileall -q src scripts tests app.py benchmark.py generate_demo.py realtime_demo.py

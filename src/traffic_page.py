@@ -7,6 +7,10 @@ import pandas as pd
 import streamlit as st
 from .traffic import VEHICLE_CLASSES
 from .video_processor import processVideo
+from .video_limits import (
+    MAX_TRAFFIC_UPLOAD_BYTES,
+    validateTrafficUpload,
+)
 
 
 def renderTrafficPage(root):
@@ -24,7 +28,10 @@ def renderTrafficPage(root):
             )
             upload = (
                 st.file_uploader(
-                    "Clean traffic footage", type=["mp4"], key="trafficUpload"
+                    "Clean traffic footage (MP4, up to 50 MB / 30 seconds)",
+                    type=["mp4"],
+                    key="trafficUpload",
+                    max_upload_size=MAX_TRAFFIC_UPLOAD_BYTES // (1024 * 1024),
                 )
                 if source == "Upload traffic MP4"
                 else None
@@ -50,6 +57,8 @@ def renderTrafficPage(root):
                 st.warning("Select at least one vehicle class.")
             elif source == "Upload traffic MP4" and upload is None:
                 st.warning("Choose an MP4 first.")
+            elif upload is not None and upload.size > MAX_TRAFFIC_UPLOAD_BYTES:
+                st.warning("Traffic uploads are limited to 50 MB. Choose a smaller MP4.")
             else:
                 folder = root / "outputs" / "runs" / uuid.uuid4().hex
                 folder.mkdir(parents=True)
@@ -58,6 +67,8 @@ def renderTrafficPage(root):
                     path = folder / "input.mp4"
                     path.write_bytes(upload.getvalue())
                 try:
+                    if upload is not None:
+                        validateTrafficUpload(path, upload.size)
                     progress = st.progress(0, text="Loading model")
                     processVideo(
                         path,
@@ -77,7 +88,7 @@ def renderTrafficPage(root):
                     st.session_state.trafficRunDir = str(folder)
                     st.rerun()
                 except Exception as exc:
-                    st.error(f"Traffic analysis failed: {exc}")
+                    st.error(f"Traffic analysis failed: {str(exc)[:240]}")
         if st.button("Load saved traffic showcase"):
             st.session_state.trafficRunDir = str(root / "outputs" / "traffic")
             st.rerun()
